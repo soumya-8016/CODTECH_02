@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8fafc;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+        }
+        .nav-tab:hover:not(.active) {
+            background: #f1f5f9;
+        }
+        .section {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .section.active {
+            display: block;
+        }
+        .endpoint-group {
+            margin-bottom: 2rem;
+        }
+        .endpoint-group h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        .endpoint {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .method {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+        .method.get { background: #dcfce7; color: #166534; }
+        .method.post { background: #dbeafe; color: #1e40af; }
+        .method.put { background: #fed7aa; color: #ea580c; }
+        .method.delete { background: #fecaca; color: #dc2626; }
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #334155;
+        }
+        .endpoint-description {
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+        .test-form {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        .response {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+        }
+        .response.success {
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+        .response.error {
+            background: #fecaca;
+            border: 1px solid #fca5a5;
+            color: #dc2626;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .card h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            opacity: 0.9;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .nav-tabs {
+                flex-direction: column;
+            }
+            .endpoint-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Library Management API</h1>
+            <p>RESTful API for managing library inventory, authors, and borrowers</p>
+        </div>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('overview')">📊 Overview</button>
+            <button class="nav-tab" onclick="showSection('documentation')">📖 Documentation</button>
+            <button class="nav-tab" onclick="showSection('test')">🧪 API Tester</button>
+        </div>
+        <div id="overview" class="section active">
+            <h2>API Overview</h2>
+            <p>This RESTful API provides comprehensive library management functionality with full CRUD operations.</p>  
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="bookCount">7</div>
+                    <div class="stat-label">Total Books</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="authorCount">3</div>
+                    <div class="stat-label">Authors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="borrowerCount">2</div>
+                    <div class="stat-label">Borrowers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="availableCount">5</div>
+                    <div class="stat-label">Available Books</div>
+                </div>
+            </div>
+            <div class="grid">
+                <div class="card">
+                    <h4>📚 Books Management</h4>
+                    <p>Full CRUD operations for library books including borrowing and returning functionality.</p>
+                </div>
+                <div class="card">
+                    <h4>✍️ Authors Management</h4>
+                    <p>Manage author information with biographical details and associated books.</p>
+                </div>
+                <div class="card">
+                    <h4>👥 Borrowers Management</h4>
+                    <p>Handle library member registration and track borrowing history.</p>
+                </div>
+                <div class="card">
+                    <h4>🔍 Advanced Features</h4>
+                    <p>Search, filter, and manage book availability with validation and error handling.</p>
+                </div>
+            </div>
+        </div>
+        <div id="documentation" class="section">
+            <h2>API Documentation</h2>
+            <div class="endpoint-group">
+                <h3>📚 Books Endpoints</h3>  
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/api/books</span>
+                    </div>
+                    <div class="endpoint-description">
+                        Retrieve all books. Supports filtering by availability, genre, and author.
+                        <br><strong>Query Parameters:</strong> available (boolean), genre (string), author (string)
+                    </div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/api/books/:id</span>
+                    </div>
+                    <div class="endpoint-description">Retrieve a specific book by ID.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/api/books</span>
+                    </div>
+                    <div class="endpoint-description">
+                        Create a new book entry.
+                        <br><strong>Required:</strong> title, author, isbn
+                        <br><strong>Optional:</strong> genre, publishedYear, available
+                    </div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method put">PUT</span>
+                        <span class="endpoint-url">/api/books/:id</span>
+                    </div>
+                    <div class="endpoint-description">Update an existing book.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method delete">DELETE</span>
+                        <span class="endpoint-url">/api/books/:id</span>
+                    </div>
+                    <div class="endpoint-description">Delete a book from the library.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/api/books/:id/borrow</span>
+                    </div>
+                    <div class="endpoint-description">
+                        Borrow a book for a specific user.
+                        <br><strong>Body:</strong> { "borrowerId": number }
+                    </div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/api/books/:id/return</span>
+                    </div>
+                    <div class="endpoint-description">Return a borrowed book.</div>
+                </div>
+            </div>
+            <div class="endpoint-group">
+                <h3>✍️ Authors Endpoints</h3>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/api/authors</span>
+                    </div>
+                    <div class="endpoint-description">Retrieve all authors.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/api/authors/:id</span>
+                    </div>
+                    <div class="endpoint-description">Retrieve a specific author with their books.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/api/authors</span>
+                    </div>
+                    <div class="endpoint-description">
+                        Create a new author.
+                        <br><strong>Required:</strong> name
+                        <br><strong>Optional:</strong> biography, birthYear, nationality
+                    </div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method put">PUT</span>
+                        <span class="endpoint-url">/api/authors/:id</span>
+                    </div>
+                    <div class="endpoint-description">Update an existing author.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method delete">DELETE</span>
+                        <span class="endpoint-url">/api/authors/:id</span>
+                    </div>
+                    <div class="endpoint-description">Delete an author.</div>
+                </div>
+            </div>
+            <div class="endpoint-group">
+                <h3>👥 Borrowers Endpoints</h3>   
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/api/borrowers</span>
+                    </div>
+                    <div class="endpoint-description">Retrieve all borrowers.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/api/borrowers/:id</span>
+                    </div>
+                    <div class="endpoint-description">Retrieve a specific borrower with their borrowed books.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/api/borrowers</span>
+                    </div>
+                    <div class="endpoint-description">
+                        Create a new borrower.
+                        <br><strong>Required:</strong> name, email
+                        <br><strong>Optional:</strong> membershipDate
+                    </div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method put">PUT</span>
+                        <span class="endpoint-url">/api/borrowers/:id</span>
+                    </div>
+                    <div class="endpoint-description">Update an existing borrower.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method delete">DELETE</span>
+                        <span class="endpoint-url">/api/borrowers/:id</span>
+                    </div>
+                    <div class="endpoint-description">Delete a borrower (only if no active loans).</div>
+                </div>
+            </div>
+        </div>
+        <div id="test" class="section">
+            <h2>🧪 API Tester</h2>
+            <p>Test the API endpoints directly from this interface.</p>
+            <div class="test-form">
+                <div class="form-group">
+                    <label for="method">HTTP Method:</label>
+                    <select id="method" onchange="updateEndpointOptions()">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="endpoint">Endpoint:</label>
+                    <select id="endpoint">
+                        <option value="/api/books">Get all books</option>
+                        <option value="/api/authors">Get all authors</option>
+                        <option value="/api/borrowers">Get all borrowers</option>
+                    </select>
+                </div>
+                <div class="form-group" id="idGroup" style="display: none;">
+                    <label for="resourceId">Resource ID:</label>
+                    <input type="number" id="resourceId" placeholder="Enter resource ID">
+                </div>
+                <div class="form-group" id="bodyGroup" style="display: none;">
+                    <label for="requestBody">Request Body (JSON):</label>
+                    <textarea id="requestBody" placeholder="Enter JSON payload here..."></textarea>
+                </div>
+                <button class="btn" onclick="testAPI()">Send Request</button>
+                <div id="response" class="response" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let stats = { books: 7, authors: 3, borrowers: 2, available: 5 };
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+        });
+        function showSection(sectionName) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.getElementById(sectionName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        async function loadStats() {
+            try {
+                const [books, authors, borrowers] = await Promise.all([
+                    fetch('/api/books').then(r => r.json()),
+                    fetch('/api/authors').then(r => r.json()),
+                    fetch('/api/borrowers').then(r => r.json())
+                ]);
+                stats.books = books.count || 7;
+                stats.authors = authors.count || 3;
+                stats.borrowers = borrowers.count || 2;
+                stats.available = books.data ? books.data.filter(book => book.available).length : 5;
+                document.getElementById('bookCount').textContent = stats.books;
+                document.getElementById('authorCount').textContent = stats.authors;
+                document.getElementById('borrowerCount').textContent = stats.borrowers;
+                document.getElementById('availableCount').textContent = stats.available;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        function updateEndpointOptions() {
+            const method = document.getElementById('method').value;
+            const endpointSelect = document.getElementById('endpoint');
+            const idGroup = document.getElementById('idGroup');
+            const bodyGroup = document.getElementById('bodyGroup');
+            endpointSelect.innerHTML = '';
+            const endpoints = {
+                'GET': [
+                    { value: '/api/books', text: 'Get all books' },
+                    { value: '/api/books/:id', text: 'Get book by ID' },
+                    { value: '/api/authors', text: 'Get all authors' },
+                    { value: '/api/authors/:id', text: 'Get author by ID' },
+                    { value: '/api/borrowers', text: 'Get all borrowers' },
+                    { value: '/api/borrowers/:id', text: 'Get borrower by ID' }
+                ],
+                'POST': [
+                    { value: '/api/books', text: 'Create new book' },
+                    { value: '/api/books/:id/borrow', text: 'Borrow book' },
+                    { value: '/api/books/:id/return', text: 'Return book' },
+                    { value: '/api/authors', text: 'Create new author' },
+                    { value: '/api/borrowers', text: 'Create new borrower' }
+                ],
+                'PUT': [
+                    { value: '/api/books/:id', text: 'Update book' },
+                    { value: '/api/authors/:id', text: 'Update author' },
+                    { value: '/api/borrowers/:id', text: 'Update borrower' }
+                ],
+                'DELETE': [
+                    { value: '/api/books/:id', text: 'Delete book' },
+                    { value: '/api/authors/:id', text: 'Delete author' },
+                    { value: '/api/borrowers/:id', text: 'Delete borrower' }
+                ]
+            };
+            endpoints[method].forEach(endpoint => {
+                const option = document.createElement('option');
+                option.value = endpoint.value;
+                option.textContent = endpoint.text;
+                endpointSelect.appendChild(option);
+            });
+            const needsId = endpointSelect.value.includes(':id');
+            idGroup.style.display = needsId ? 'block' : 'none';
+            const needsBody = method === 'POST' || method === 'PUT';
+            bodyGroup.style.display = needsBody ? 'block' : 'none';
+            if (needsBody) {
+                setDefaultJSON();
+            }
+        }
+        function setDefaultJSON() {
+            const endpoint = document.getElementById('endpoint').value;
+            const bodyTextarea = document.getElementById('requestBody');
+            const defaults = {
+                '/api/books': JSON.stringify({
+                    title: "Example Book",
+                    author: "Example Author",
+                    isbn: "978-0-123456-78-9",
+                    genre: "Fiction",
+                    publishedYear: 2024
+                }, null, 2),
+                '/api/books/:id/borrow': JSON.stringify({
+                    borrowerId: 1
+                }, null, 2),
+                '/api/authors': JSON.stringify({
+                    name: "Example Author",
+                    biography: "A talented writer",
+                    birthYear: 1980,
+                    nationality: "American"
+                }, null, 2),
+                '/api/borrowers': JSON.stringify({
+                    name: "John Doe",
+                    email: "john.doe@example.com"
+                }, null, 2)
+            };
+            bodyTextarea.value = defaults[endpoint] || '{}';
+        }
+        async function testAPI() {
+            const method = document.getElementById('method').value;
+            let endpoint = document.getElementById('endpoint').value;
+            const resourceId = document.getElementById('resourceId').value;
+            const body = document.getElementById('requestBody').value;
+            const responseDiv = document.getElementById('response');
+            if (endpoint.includes(':id')) {
+                if (!resourceId) {
+                    alert('Please enter a resource ID');
+                    return;
+                }
+                endpoint = endpoint.replace(':id', resourceId);
+            }
+            const url = `http://localhost:3001${endpoint}`;
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            if (method === 'POST' || method === 'PUT') {
+                try {
+                    JSON.parse(body); 
+                    options.body = body;
+                } catch (e) {
+                    alert('Invalid JSON in request body');
+                    return;
+                }
+            }
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                
+                responseDiv.style.display = 'block';
+                responseDiv.className = `response ${response.ok ? 'success' : 'error'}`;
+                responseDiv.textContent = `Status: ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+                if (response.ok) {
+                    loadStats();
+                }
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+        document.getElementById('endpoint').addEventListener('change', function() {
+            const needsId = this.value.includes(':id');
+            document.getElementById('idGroup').style.display = needsId ? 'block' : 'none';
+            
+            const method = document.getElementById('method').value;
+            if (method === 'POST' || method === 'PUT') {
+                setDefaultJSON();
+            }
+        });
+    </script>
+</body>
+</html>

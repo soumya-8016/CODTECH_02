@@ -1,0 +1,18 @@
+{
+  "name": "library-management-api",
+  "version": "1.0.0",
+  "description": "RESTful API for library management system",
+  "main": "server.cjs",
+  "type": "module",
+  "scripts": {
+    "start": "node server.cjs",
+    "dev": "node server.cjs"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "keywords": ["api", "library", "rest", "crud"],
+  "author": "SOUMYA SAMANTA",
+  "license": "MIT"
+}
